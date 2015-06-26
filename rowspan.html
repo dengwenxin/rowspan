@@ -1,0 +1,262 @@
+<!--给每个tr都设置类 rowspan 同行的类相同-->
+
+
+$("#tableId").find("> tbody > tr.odd").css("background","#f3f3f3");
+$("#tableId").find("> tbody > tr.even").css("background","#fff");
+
+
+
+<?php echo App::uses('OptionsData', 'Lib');?>
+
+<h2>
+<?php echo __('defectAnalysisList')?>
+</h2>
+<?php echo $this->Session->flash();?>
+<div class="content-box">
+<?php echo $this->Form->create('SearchCondition', array('type' => 'post', 'id' => 'problemAnalyseListForm','name' => 'problemAnalyseListForm'));?>
+    <div class="content-box-header">
+        <h3>
+        <?php echo __('searchCondition')?>
+        </h3>
+    </div>
+    <div class="content-box-content">
+        <table>
+            <tbody class="searchEmployeeAttendance">
+                <tr>
+                    <td class="label"><?php  echo __('defectId') ?></td>
+                    <td><span><?php echo $this->Form->input('defectId',
+                    array('div' => false, 'label' => false, 'type' => 'text', 'class' => 'text-input'));?>
+                    </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><?php  echo __('project') ?></td>
+                    <td><span><?php echo $this->Form->input('Project', array('div' => false,'label' => false,'empty' => __('choose')));?>
+                    </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><?php echo __('versionDate')?>
+                    </td>
+                    <td><span> <?php
+                    echo $this->Form->input('startDate',
+                    array('div' => false, 'label' => false, 'type' => 'text', 'class' => 'text-input', 'id' => 'startDatePicker', 'value'=>$startDate));
+                    ?> ~ <?php
+                    echo $this->Form->input('endDate',
+                    array('div' => false, 'label' => false, 'type' => 'text', 'class' => 'text-input', 'id' => 'endDatePicker', 'value'=>$endDate));
+                    ?> </span>
+                    </td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr class="btn">
+                    <td class="btn" colspan="2"><?php echo $this->Form->button(__('searchBtn'), array('type' => 'submit','id' => 'btn'));?>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="content-box">
+    <div class="content-box-header">
+        <h3>
+        <?php echo __('defectList')?>
+        </h3>
+    </div>
+    <div class="content-box-content">
+    <?php if(sizeof($defectAnalysisDataArray) == 0):?>
+    <?php echo __("dataEmptyMsg") ?>
+    <?php else:?>
+        <div class="account_list" style="width: 100%">
+            <div class="paging">
+                <?php
+                $this->Paginator->options(array('url'=> array()));
+                ?>
+                <?php
+                if ($this->Paginator->counter('{:pages}') > 1) {
+                    $this->Paginator->options(array('url'=> array('defectId'=> $defectId,'Project'=> $projectId,
+                                                'startDate' => $startDate, 'endDate' => $endDate)));
+                    echo $this->Paginator->prev('<< ', array(), null, array('class' => 'prev disabled'));
+                    echo $this->Paginator->numbers(array('separator' => '','first' => 2, 'last' => 2));
+                    echo $this->Paginator->next(' >>', array(), null, array('class' => 'next disabled'));
+                }
+                ?>
+                    <div class="pagecount">
+                    <?php
+                    echo $this->Paginator->counter(array('format' => __("pageCount").__('{:count}')));
+                    ?>
+                    </div>
+             </div>
+            <table class="Bug_table" id="defectPreventTable" style="width: 100%">
+            <?php echo $this->Form->hidden('SearchCondition.page',array('value' => $page)); ?>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;"><?php echo __("defectId") ?></th>
+                        <th style="width: 90px"><?php echo __("project") ?></th>
+                        <th style="width: 130px"><?php echo __("issueSubject") ?></th>
+                        <th style="width: 33%"><?php echo __("createPreventMeasure") ?>
+                        </th>
+                        <th style="width: 33%"><?php echo __("outflowPreventMeasure") ?>
+                        </th>
+                    </tr>
+                </thead>
+                    <?php $index = 0; ?>
+                <?php foreach ($defectAnalysisDataArray as $defectAnalysisData): ?>
+                            <?php $index += 1; ?>
+                            <?php if($index % 2 == 1): ?>
+                                  <?php $row = "even"; ?>
+                            <?php endif;?>
+                            <?php if($index % 2 == 0): ?>
+                                  <?php $row = "odd"; ?>
+                            <?php endif;?>
+                    <?php $len = $defectAnalysisData['length']; ?>
+                    <tr class="<?php echo $row; ?>">
+                        <td rowspan="<?php echo $len?>"><u class="defctIdTd"><?php echo h($defectAnalysisData['Issue']['id']); ?></u></td>
+                        <td rowspan="<?php echo $len?>"><?php echo h($defectAnalysisData['Project']['name']); ?></td>
+                        <td rowspan="<?php echo $len?>"><?php echo h($defectAnalysisData['Issue']['subject']); ?></td>
+                        <?php if (sizeof($defectAnalysisData['create_prevent_measure']) > 0 ): ?>
+                            <?php $createMeasure = $defectAnalysisData['create_prevent_measure'][0]['DefectPreventMeasures']['measure']; ?>
+                            <?php $status = $defectAnalysisData['create_prevent_measure'][0]['DefectPreventMeasures']['status']; ?>
+                            <?php $disabledFlag = $defectAnalysisData['create_prevent_measure'][0]['disabledFlag']; ?>
+                            <?php $defectPreventMearsureId = $defectAnalysisData['create_prevent_measure'][0]['DefectPreventMeasures']['id']; ?>
+                            <?php if ($status == "todo" ): ?><?php $image = "1.png"?>
+                            <?php elseif ($status == "done"):?><?php $image = "2.png"?>
+                            <?php elseif ($status == "confirmed"):?><?php $image = "3.png"?>
+                            <?php endif;?>
+                            <td>
+                                <div class="defectPreventLabel"><?php echo h($createMeasure); ?></div>
+                                    <div class="defectStatusImage">
+                                          <?php $imageId = "image".$defectPreventMearsureId ?>
+                                        <?php echo $this->Html->image($image, array('alt' => 'image', 'border' => '0','id'=>$imageId)) ?>
+                                    </div>
+                                  <div class="defectPreventPullDown">
+                                      <?php echo $this->Form->input('status',
+                                    array('div' => false,'id'=>$defectPreventMearsureId, 'class'=>'measureSelect', 'disabled' => $disabledFlag,'label' => false,'options' => OptionsData::defectStatus(),
+                                    'value'=>$status));?>
+                               </div>
+                            </td>
+                            <?php else:?>
+                            <td></td>
+                        <?php endif;?>
+                        <?php if (sizeof($defectAnalysisData['outflow_prevent_measure']) > 0 ): ?>
+                            <?php $outflowMeasure = $defectAnalysisData['outflow_prevent_measure'][0]['DefectPreventMeasures']['measure']; ?>
+                            <?php $status = $defectAnalysisData['outflow_prevent_measure'][0]['DefectPreventMeasures']['status']; ?>
+                            <?php $disabledFlag = $defectAnalysisData['outflow_prevent_measure'][0]['disabledFlag']; ?>
+                            <?php $defectPreventMearsureId = $defectAnalysisData['outflow_prevent_measure'][0]['DefectPreventMeasures']['id']; ?>
+                            <?php if ($status == "todo" ): ?><?php $image = "1.png"?>
+                            <?php elseif ($status == "done"):?><?php $image = "2.png"?>
+                            <?php elseif ($status == "confirmed"):?><?php $image = "3.png"?>
+                            <?php endif;?>
+                            <td>
+                               <div class="defectPreventLabel"><?php echo h($outflowMeasure); ?></div>
+                                <div class="defectStatusImage">
+                                      <?php $imageId = "image".$defectPreventMearsureId ?>
+                                        <?php echo $this->Html->image($image, array('alt' => 'image', 'border' => '0','id'=>$imageId)) ?>
+                                  </div>
+                               <div class="defectPreventPullDown">
+                                  <?php echo $this->Form->input('status',
+                                    array('div' => false,'id'=>$defectPreventMearsureId,'class'=>'measureSelect', 'disabled' => $disabledFlag,'label' => false,'options' => OptionsData::defectStatus(),
+                                    'value'=>$status));?>
+                               </div>
+                            </td>
+                            <?php else:?>
+                        <td></td>
+                        <?php endif;?>
+                    </tr>
+                    <?php if ($len > 1 ): ?>
+                        <?php for ($i=1; $i< $len; $i++): ?>
+                        <tr class="<?php echo $row; ?>">
+                            <?php if ($i < sizeof($defectAnalysisData['create_prevent_measure'])): ?>
+                                <?php $createMeasure = $defectAnalysisData['create_prevent_measure'][$i]['DefectPreventMeasures']['measure']; ?>
+                                   <?php $status = $defectAnalysisData['create_prevent_measure'][$i]['DefectPreventMeasures']['status']; ?>
+                                <?php $disabledFlag = $defectAnalysisData['create_prevent_measure'][$i]['disabledFlag']; ?>
+                                <?php $defectPreventMearsureId = $defectAnalysisData['create_prevent_measure'][$i]['DefectPreventMeasures']['id']; ?>
+                                <!-- 判断图片类型 -->
+                                <?php if ($status == "todo" ): ?><?php $image = "1.png"?>
+                                <?php elseif ($status == "done"):?><?php $image = "2.png"?>
+                                <?php elseif ($status == "confirmed"):?><?php $image = "3.png"?>
+                                <?php endif;?>
+                                <td>
+                                   <div class="defectPreventLabel"><?php echo h($createMeasure); ?></div>
+                                     <div class="defectStatusImage" id=<?php echo "img".$defectPreventMearsureId; ?>>
+                                          <?php $imageId = "image".$defectPreventMearsureId ?>
+                                            <?php echo $this->Html->image($image, array('alt' => 'image', 'border' => '0','id'=>$imageId)) ?>
+                                        </div>
+                                     <div class="defectPreventPullDown">
+                                      <?php echo $this->Form->input('status',
+                                        array('div' => false,'id'=>$defectPreventMearsureId,'class'=>'measureSelect', 'disabled' => $disabledFlag, 'label' => false, 'options' => OptionsData::defectStatus(),
+                                        'value'=>$status));?>
+                                   </div>
+                                </td>
+                                <?php else:?>
+                                <td></td>
+                            <?php endif;?>
+                            <?php if ($i < sizeof($defectAnalysisData['outflow_prevent_measure'])): ?>
+                                <?php $outflowMeasure = $defectAnalysisData['outflow_prevent_measure'][$i]['DefectPreventMeasures']['measure']; ?>
+                                <?php $status = $defectAnalysisData['outflow_prevent_measure'][$i]['DefectPreventMeasures']['status']; ?>
+                                <?php $disabledFlag = $defectAnalysisData['outflow_prevent_measure'][$i]['disabledFlag']; ?>
+                                <?php $defectPreventMearsureId = $defectAnalysisData['outflow_prevent_measure'][$i]['DefectPreventMeasures']['id']; ?>
+                                <?php if ($status == "todo" ): ?><?php $image = "1.png"?>
+                                <?php elseif ($status == "done"):?><?php $image = "2.png"?>
+                                <?php elseif ($status == "confirmed"):?><?php $image = "3.png"?>
+                                <?php endif;?>
+                                <td>
+                                    <div class="defectPreventLabel"><?php echo h($outflowMeasure); ?></div>
+                                      <div class="defectStatusImage">
+                                            <?php $imageId = "image".$defectPreventMearsureId ?>
+                                            <?php echo $this->Html->image($image, array('alt' => 'image', 'border' => '0','id'=>$imageId)) ?>
+                                        </div>
+                                      <div class="defectPreventPullDown">
+                                        <?php echo $this->Form->input('status',
+                                        array('div' => false,'id'=>$defectPreventMearsureId, 'class'=>'measureSelect', 'disabled' => $disabledFlag,'label' => false, 'options' => OptionsData::defectStatus(),
+                                        'value'=>$status));?>
+                                   </div>
+                                </td>
+                            <?php else:?>
+                                <td></td>
+                            <?php endif;?>
+                        </tr>
+                        <?php endfor;?>
+                    <?php endif;?>
+                <?php endforeach;?>
+            </table>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+<!-- End .content-box -->
+<script>
+initDatePicker();
+$(document).ready(function(){
+    $(".measureSelect").on("change", function(event){
+        var defectPreventMeasureId = event.currentTarget.id;
+        var status = event.currentTarget.value;
+        if (status =='todo') {
+             $("#image" + defectPreventMeasureId).attr("src", "../img/1.png");
+        } else if (status =='done') {
+            $("#image" + defectPreventMeasureId).attr("src", "../img/2.png");      
+        } else if (status =='confirmed') {
+            $("#image" + defectPreventMeasureId).attr("src", "../img/3.png");    
+        }
+        $.ajax({
+            type: 'POST',
+            data: {"defectPreventMeasureId" :defectPreventMeasureId,"status": status},        
+            url: '<?php echo $this->Html->url('/QualityManagement/ajax_set_defect_analysis_status', true); ?>',
+        });
+      });
+});
+
+$(".defctIdTd").on("click", function(event){
+    var defectId = $(this).html();
+    var pathName = window.location.pathname.substring(1);
+    var webName = pathName == '' ? '' : pathName.substring(0, pathName.indexOf('/'));
+    var rootPath = window.location.protocol + '//' + window.location.host + '/' + webName;
+    window.location.href = rootPath +"/QualityManagement/defect_analysis_detail/?" + defectId;
+});
+
+
+
+$("#defectPreventTable").find("> tbody > tr.odd").css("background","#f3f3f3");
+$("#defectPreventTable").find("> tbody > tr.even").css("background","#fff");
+    
+</script>
